@@ -31,10 +31,7 @@ export const runAgent = async (
 
   console.log("done");
 
-  for (const tc of toolCalls) {
-    console.log(await executeTool(tc.toolName, tc.input));
-    await Laminar.shutdown();
-  }
+  await Laminar.flush()
 };
 
 runAgent("what is the current date/time?");
