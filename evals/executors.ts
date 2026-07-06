@@ -1,5 +1,6 @@
 import { generateText, stepCountIs, tool, type ToolSet } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { buildMessages } from "./utils.ts";
 import { z } from "zod";
 
 import type {
@@ -9,7 +10,7 @@ import type {
   MultiTurnResult,
 } from "./types.ts";
 
-const TOOL_DEFINITIONS = {
+const TOOL_DEFINITIONS: any = {
   readFile: {
     description: "Read the contents of a file at the specified path",
     parameters: z.object({
@@ -49,4 +50,20 @@ const TOOL_DEFINITIONS = {
       }),
     }),
   },
+};
+
+export const singleTurnExecutor = async (data: EvalData) => {
+  const messages = buildMessages(data);
+
+  const tools: ToolSet = {};
+  for (const toolName of data.tools) {
+    const def = TOOL_DEFINITIONS[toolName];
+
+    if (def) {
+      tools[toolName] = tool({
+        description: def.description,
+        inputSchema: def.parameters,
+      });
+    }
+  }
 };
