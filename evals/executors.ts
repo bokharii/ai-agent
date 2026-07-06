@@ -66,4 +66,25 @@ export const singleTurnExecutor = async (data: EvalData) => {
       });
     }
   }
+
+  const { toolCalls } = await generateText({
+    model: openai(data.config?.model ?? "gpt-5-mini"),
+    messages,
+    tools,
+    stopWhen: stepCountIs(1),
+    temperature: data.config?.temperature ?? undefined,
+  });
+
+  const calls = toolCalls.map((tc) => ({
+    toolName: tc.toolName,
+    args: "args" in tc ? tc.args : {},
+  }));
+
+  const toolNames = toolCalls.map((tc) => tc.toolName);
+
+  return {
+    toolCalls,
+    toolNames,
+    selectedAny: toolNames.length > 0,
+  };
 };
